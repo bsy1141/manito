@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="manito.js"></script>
     </head>
     <body>
+        <button id="makeManito">마니또 만들기</button>
         <h1>마니또 뽑기</h1>
         <p>이름을 입력하세요:)</p>
         <input type="text" id="name">
-        <button onClick="whoIsManito()">클릭</button>
+        <button id="getManito">클릭</button>
         <div>
             <p></p>
             <span>당신의 마니또는</span>
@@ -16,5 +16,66 @@
         </div>
         
     </body>
-    
+    <script type="module">
+        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"
+        import { getFirestore, doc, setDoc, onSnapshot} from 'https://www.gstatic.com/firebasejs/9.5.0/firebase-firestore.js'
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAhRTEGulB_SSr3KVqpG5qbjBgxwBc0OlE",
+          authDomain: "manito-6175c.firebaseapp.com",
+          projectId: "manito-6175c",
+          storageBucket: "manito-6175c.appspot.com",
+          messagingSenderId: "239102772150",
+          appId: "1:239102772150:web:350042fbcf3b188361b717"
+        };
+      
+        const app = initializeApp(firebaseConfig);
+        const db=getFirestore();
+
+        function draw(i,nums){
+            let answer=0;
+            while(true){
+                let drawing=Math.floor(Math.random()*6);
+                if(drawing!==i&&!nums.includes(drawing)){
+                    answer=drawing;
+                    break;
+                }
+            }
+            return answer;
+        }
+
+        function sol(arr){
+            let answer=[];
+            let nums=[];
+            for(let i=0;i<arr.length;i++){
+                const drawing=draw(i,nums);
+                answer[arr[i]]=arr[drawing];
+                nums.push(drawing);
+            }
+
+            return answer;
+        }
+
+        function makeManito(){
+            const result=sol(['윤지','서영','소정','정윤','정빈','주영']);
+           for(let v in result){
+                setDoc(doc(db,"users",v),{
+                    manito:result[v],
+                });
+            } 
+        }
+        document.getElementById("makeManito").addEventListener("click",makeManito);
+        
+        function whoIsManito(){
+            const name=document.getElementById('name').value;
+            let m="";
+            const unsub = onSnapshot(doc(db, "users", name), (doc) => {
+                document.getElementById('manito').innerHTML=doc.data().manito;
+            });
+        }
+
+        document.getElementById("getManito").addEventListener("click",whoIsManito);
+      </script>
 </html>
+
